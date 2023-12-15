@@ -4,92 +4,50 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.subsystems.Elevator;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 /** This is a sample program to demonstrate the use of elevator simulation. */
-public class Robot extends TimedRobot{
-  private final Joystick m_joystick = new Joystick(Constants.kJoystickPort);
-
-  private final Encoder elevatorEncoder = new Encoder(Constants.kEncoderAChannel, Constants.kEncoderBChannel);
-  private final PWMSparkMax elevatorMotor = new PWMSparkMax(Constants.kMotorPort);
-
-  private final Elevator m_elevator = new Elevator(elevatorEncoder, elevatorMotor);
-
-  private ElevatorSimulationInterface m_elevatorSimulation;
-  private double setPoint = 0;
-
-
+public class Robot extends TimedRobot
+{
+  private RobotContainer m_robotContainer;
  
 
   @Override
   public void robotInit()
   {
-    if(RobotBase.isReal())
-    {
-      m_elevatorSimulation = new NullElevatorSimulation();
-    }
-    else
-    {
-      m_elevatorSimulation = new ElevatorSimulation(elevatorEncoder, elevatorMotor);
-    }
+    m_robotContainer = new RobotContainer();
   }
 
   @Override
   public void robotPeriodic() {
-    // Update the telemetry, including mechanism visualization, regardless of mode.
-    m_elevator.updateTelemetry();
+    CommandScheduler.getInstance().run();
   }
 
   @Override
   public void teleopInit()
   {
-    m_elevator.initConstants();
+    m_robotContainer.teleopInit();
   }
 
   @Override
   public void simulationPeriodic() {
     // Update the simulation model.
-    m_elevatorSimulation.elevatorSimulationPeriodic();
+    m_robotContainer.simulationPeriodic();
   }
 
   @Override
   public void teleopPeriodic()
   {
-    if (m_joystick.getRawButtonPressed(1))
-      setPoint = 0.25;
-    else if(m_joystick.getRawButtonPressed(2))
-      setPoint = 0.50;
-    else if(m_joystick.getRawButtonPressed(3))
-      setPoint = 0.75;
-    else if(m_joystick.getRawButtonPressed(4))
-      setPoint = 1.00;
-    else if(m_joystick.getRawButtonPressed(10))
-      setPoint = 0.00;
-    else
-      setPoint = SmartDashboard.getNumber("Goal", setPoint);
-
-
-    SmartDashboard.putNumber("Goal", setPoint);
-
-    m_elevator.reachGoal(setPoint);
   }
 
   @Override
   public void disabledInit() {
-    // This just makes sure that our simulation code knows that the motor's off.
-    m_elevator.stop();
   }
 
   @Override
   public void close() {
-    elevatorEncoder.close();
-    elevatorMotor.close();
+    m_robotContainer.close();
     super.close();
   }
 }

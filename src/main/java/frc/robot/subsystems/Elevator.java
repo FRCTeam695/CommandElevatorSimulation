@@ -11,8 +11,10 @@ import edu.wpi.first.wpilibj.Encoder;
 import frc.robot.Constants;
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Elevator
+public class Elevator extends SubsystemBase
 {
   // Default Constants/Gains
   private double maxVelFromDash = 2.45;
@@ -67,7 +69,7 @@ public class Elevator
    *
    * @param goal the position to maintain
    */
-  public void reachGoal(double goal)
+  private void reachGoal(double goal)
   {
     m_controller.setGoal(goal);
 
@@ -77,18 +79,36 @@ public class Elevator
     m_motor.setVoltage(pidOutput + feedforwardOutput);
   }
 
+  public Command goToHeight(double goal)
+  {
+    return run(()-> reachGoal(goal));
+  }
+
+  public Command stop()
+  {
+    return run(()-> internalStop()).ignoringDisable(true);
+  }
+
   /** Stop the control loop and motor output. */
-  public void stop()
+  private void internalStop()
   {
     m_controller.setGoal(0.0);
     m_motor.set(0.0);
   }
 
-  public void updateTelemetry()
+  @Override
+  public void periodic()
+  {
+     // Update the telemetry, including mechanism visualization, regardless of mode.
+    updateTelemetry();
+  }
+
+  private void updateTelemetry()
   {
     SmartDashboard.putNumber("setpointPosition",m_controller.getSetpoint().position);
     SmartDashboard.putNumber("setpointVelocity",m_controller.getSetpoint().velocity);
     SmartDashboard.putNumber("ElevatorHeight", m_encoder.getDistance());
+    SmartDashboard.putNumber("ElevatorGoalHeight", m_controller.getGoal().position);
   }
 
   

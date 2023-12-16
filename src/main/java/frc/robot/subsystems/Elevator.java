@@ -10,11 +10,14 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Encoder;
 import frc.robot.Constants;
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Elevator extends SubsystemBase
+public class Elevator extends SubsystemBase implements AutoCloseable
 {
   // Default Constants/Gains
   private double maxVelFromDash = 2.45;
@@ -27,6 +30,15 @@ public class Elevator extends SubsystemBase
   // Calculators - poke results in, get results out
   private ProfiledPIDController m_controller;
   private ElevatorFeedforward m_feedforward;
+
+
+  // Tell Glass to create a visualization of the elevator
+  private static final double VISUAL_HEIGHT = 10;
+  private final Mechanism2d m_elevatorDisplay = new Mechanism2d(20, VISUAL_HEIGHT);
+  private final MechanismRoot2d m_elevatorStickStart = m_elevatorDisplay.getRoot("Elevator Root", 10, 0);
+  private final MechanismLigament2d m_elevatorStickDrawing =
+      m_elevatorStickStart.append(
+          new MechanismLigament2d("Elevator", 0, 90));
   
   
   public Elevator(Encoder encoder, PWMSparkMax motor)
@@ -42,6 +54,10 @@ public class Elevator extends SubsystemBase
     SmartDashboard.putNumber("maxVelocity", maxVelFromDash);
     SmartDashboard.putNumber("maxAcceleration", maxAccelFromDash);
     initConstantsInternal();
+
+    // Publish Mechanism2d to SmartDashboard
+    // To view the Elevator visualization, select Network Tables -> SmartDashboard -> Elevator Sim
+    SmartDashboard.putData("Elevator Sim", m_elevatorDisplay);
   }
 
   // Public interface -- this (and only this) is how you control the elevator
@@ -74,11 +90,18 @@ public class Elevator extends SubsystemBase
     return run(()-> internalStop()).ignoringDisable(true);
   }
 
+  // Subsystem Boilerplate
   @Override
   public void periodic()
   {
      // Update the telemetry, including mechanism visualization, regardless of mode.
     updateTelemetry();
+  }
+
+  @Override
+  public void close()
+  {
+      m_elevatorDisplay.close();
   }
 
 
@@ -127,5 +150,7 @@ public class Elevator extends SubsystemBase
     SmartDashboard.putNumber("ElevatorHeight", m_encoder.getDistance());
     SmartDashboard.putNumber("ElevatorGoalHeight", m_controller.getGoal().position);
     SmartDashboard.putBoolean("ElevatorAtGoal", atGoal());
+
+    m_elevatorStickDrawing.setLength(m_encoder.getDistance() / Constants.kMaxElevatorHeightMeters * VISUAL_HEIGHT);
   }
 }

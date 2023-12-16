@@ -6,10 +6,5 @@ public class NullElevatorSimulation implements ElevatorSimulationInterface{
     public void elevatorSimulationPeriodic() {
         
     }
-
-    @Override
-    public void close() {
-        
-    }
     
 }

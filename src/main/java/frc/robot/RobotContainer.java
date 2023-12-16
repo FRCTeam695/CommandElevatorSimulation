@@ -63,6 +63,7 @@ public class RobotContainer implements AutoCloseable
     {
         elevatorEncoder.close();
         elevatorMotor.close();
+        m_elevator.close();
     }
 
 }

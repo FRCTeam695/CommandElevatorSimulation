@@ -1,6 +1,6 @@
 package frc.robot;
 
-public interface ElevatorSimulationInterface extends AutoCloseable {
+public interface ElevatorSimulationInterface {
 
     /** Advance the simulation. */
     void elevatorSimulationPeriodic();

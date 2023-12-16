@@ -25,15 +25,13 @@ public class RobotContainer implements AutoCloseable
     public RobotContainer()
     {
         if(RobotBase.isReal())
-            m_elevatorSimulation = new NullElevatorSimulation();
+            m_elevatorSimulation = ElevatorSimulationInterface.empty();
         else
             m_elevatorSimulation = new ElevatorSimulation(elevatorEncoder, elevatorMotor);
 
         
         // This just makes sure that our simulation code knows that the motor's off.
         CommandScheduler.getInstance().setDefaultCommand(m_elevator, m_elevator.stop());
-        
-        
 
         configureBindings();
     }
@@ -47,11 +45,6 @@ public class RobotContainer implements AutoCloseable
         m_joystick.button(3).onTrue(m_elevator.goToHeight(0.75));
         m_joystick.button(4).onTrue(m_elevator.goToHeight(1.00));
         m_joystick.button(10).onTrue(m_elevator.goToHeight(0.00));
-    }
-
-    public void teleopInit()
-    {
-        m_elevator.initConstants();
     }
 
     public void simulationPeriodic()

@@ -35,7 +35,7 @@ public class ElevatorSimulation implements ElevatorSimulationInterface
             0,
             VecBuilder.fill(0.01));
 
-
+    // Simulate the behavior of an elevator, using the supplied connections
     public ElevatorSimulation(Encoder encoder, PWMMotorController motor)
     {
         elevatorEncoder = encoder;

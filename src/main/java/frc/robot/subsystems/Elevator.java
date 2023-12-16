@@ -20,11 +20,11 @@ public class Elevator extends SubsystemBase
   private double maxVelFromDash = 2.45;
   private double maxAccelFromDash = 2.45;
 
-  // Hardware interface
+  // Hardware interface - only this talks to the outside world
   private final Encoder m_encoder;
   private final PWMSparkMax m_motor;
 
-  // Calculators/Solvers
+  // Calculators - poke results in, get results out
   private ProfiledPIDController m_controller;
   private ElevatorFeedforward m_feedforward;
   
@@ -41,27 +41,15 @@ public class Elevator extends SubsystemBase
     // also make for a good example if the gains and feedforward constants were included
     SmartDashboard.putNumber("maxVelocity", maxVelFromDash);
     SmartDashboard.putNumber("maxAcceleration", maxAccelFromDash);
-    initConstants();
+    initConstantsInternal();
   }
 
-  public void initConstants()
+  // Public interface -- this (and only this) is how you control the elevator
+  
+  /** Read control loop constants/limits from the dashboard */
+  public Command initConstants()
   {
-    maxVelFromDash = SmartDashboard.getNumber("maxVelocity", maxVelFromDash);
-    maxAccelFromDash = SmartDashboard.getNumber("maxAcceleration", maxAccelFromDash);
-
-    m_controller =
-      new ProfiledPIDController(
-          Constants.kElevatorKp,
-          Constants.kElevatorKi,
-          Constants.kElevatorKd,
-          new TrapezoidProfile.Constraints(maxVelFromDash, maxAccelFromDash));
-    
-    m_feedforward =
-      new ElevatorFeedforward(
-          Constants.kElevatorkS,
-          Constants.kElevatorkG,
-          Constants.kElevatorkV,
-          Constants.kElevatorkA);
+    return runOnce(()->initConstantsInternal());
   }
 
   /**
@@ -69,6 +57,53 @@ public class Elevator extends SubsystemBase
    *
    * @param goal the position to maintain
    */
+  public Command goToHeight(double goal)
+  {
+    return run(()-> reachGoal(goal));
+  }
+
+  /** Whether the profile setpoint has reached goal state */
+  public boolean atGoal()
+  {
+    return m_controller.atGoal();
+  }
+
+  /** Stop the control loop and motor output. */
+  public Command stop()
+  {
+    return run(()-> internalStop()).ignoringDisable(true);
+  }
+
+  @Override
+  public void periodic()
+  {
+     // Update the telemetry, including mechanism visualization, regardless of mode.
+    updateTelemetry();
+  }
+
+
+  // Internal controls ONLY
+
+  private void initConstantsInternal()
+  {
+      maxVelFromDash = SmartDashboard.getNumber("maxVelocity", maxVelFromDash);
+      maxAccelFromDash = SmartDashboard.getNumber("maxAcceleration", maxAccelFromDash);
+
+      m_controller =
+        new ProfiledPIDController(
+            Constants.kElevatorKp,
+            Constants.kElevatorKi,
+            Constants.kElevatorKd,
+            new TrapezoidProfile.Constraints(maxVelFromDash, maxAccelFromDash));
+      
+      m_feedforward =
+        new ElevatorFeedforward(
+            Constants.kElevatorkS,
+            Constants.kElevatorkG,
+            Constants.kElevatorkV,
+            Constants.kElevatorkA);
+    }
+
   private void reachGoal(double goal)
   {
     m_controller.setGoal(goal);
@@ -79,28 +114,10 @@ public class Elevator extends SubsystemBase
     m_motor.setVoltage(pidOutput + feedforwardOutput);
   }
 
-  public Command goToHeight(double goal)
-  {
-    return run(()-> reachGoal(goal));
-  }
-
-  public Command stop()
-  {
-    return run(()-> internalStop()).ignoringDisable(true);
-  }
-
-  /** Stop the control loop and motor output. */
   private void internalStop()
   {
     m_controller.setGoal(0.0);
     m_motor.set(0.0);
-  }
-
-  @Override
-  public void periodic()
-  {
-     // Update the telemetry, including mechanism visualization, regardless of mode.
-    updateTelemetry();
   }
 
   private void updateTelemetry()
@@ -109,7 +126,6 @@ public class Elevator extends SubsystemBase
     SmartDashboard.putNumber("setpointVelocity",m_controller.getSetpoint().velocity);
     SmartDashboard.putNumber("ElevatorHeight", m_encoder.getDistance());
     SmartDashboard.putNumber("ElevatorGoalHeight", m_controller.getGoal().position);
+    SmartDashboard.putBoolean("ElevatorAtGoal", atGoal());
   }
-
-  
 }

@@ -19,14 +19,14 @@ public class ElevatorSimulation implements ElevatorSimulationInterface
 {
     // Our link to the elevator control code, including sim classes that
     // allow us to inject values into it
+    // Connection between the controller and the plant
     private final Encoder elevatorEncoder;
     private final PWMMotorController elevatorMotor;
     private final EncoderSim m_encoderSim;
     private final PWMSim m_motorSim;
 
-    // This <calculator> represents a gearbox containing 4 Vex 775pro motors.
+    // Simulation of the plant
     private final DCMotor m_elevatorGearbox = DCMotor.getVex775Pro(4);
-    // Simulation classes help us simulate what's going on, including gravity.
     private final ElevatorSim m_elevatorSim =
         new ElevatorSim(
             m_elevatorGearbox,
@@ -39,7 +39,7 @@ public class ElevatorSimulation implements ElevatorSimulationInterface
             0,
             VecBuilder.fill(0.01));
 
-    // Create a Glass visualization of the elevator
+    // Tell Glass to create a visualization of the elevator
     private final Mechanism2d m_mech2d = new Mechanism2d(20, 10);
     private final MechanismRoot2d m_mech2dRoot = m_mech2d.getRoot("Elevator Root", 10, 0);
     private final MechanismLigament2d m_elevatorMech2d =

@@ -104,10 +104,10 @@ public class Elevator extends SubsystemBase implements AutoCloseable
     return m_controller.atGoal();
   }
 
-  /** Stop the control loop and motor output. */
-  public Command stop()
+  /** Stop the control loop and motor output. May allow elevator to fall! */
+  public Command depower()
   {
-    return run(()-> internalStop()).ignoringDisable(true).withName("Stop");
+    return run(()-> internalDepower()).ignoringDisable(true).withName("Depowered");
   }
 
   // Subsystem Boilerplate
@@ -170,9 +170,13 @@ public class Elevator extends SubsystemBase implements AutoCloseable
     prevGoalVelocity = velocity;
   }
 
-  private void internalStop()
+  private void internalDepower()
   {
     m_controller.setGoal(0.0);
+
+    // when controller is inactive, it should still be updated
+    // with the state of the physical elevator; position and velocity 
+    m_controller.reset(m_encoder.getDistance(), m_encoder.getRate());
     m_motor.set(0.0);
   }
 

@@ -33,7 +33,7 @@ public class RobotContainer implements AutoCloseable
 
         
         // This just makes sure that our simulation code knows that the motor's off.
-        CommandScheduler.getInstance().setDefaultCommand(m_elevator, m_elevator.stop());
+        CommandScheduler.getInstance().setDefaultCommand(m_elevator, m_elevator.depower());
 
         configureBindings();
     }

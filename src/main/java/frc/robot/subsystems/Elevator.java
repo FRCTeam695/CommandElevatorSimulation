@@ -181,6 +181,7 @@ public class Elevator extends SubsystemBase implements AutoCloseable
     SmartDashboard.putNumber("setpointPosition",m_controller.getSetpoint().position);
     SmartDashboard.putNumber("setpointVelocity",m_controller.getSetpoint().velocity);
     SmartDashboard.putNumber("ElevatorHeight", m_encoder.getDistance());
+    SmartDashboard.putNumber("ElevatorVelocity", m_encoder.getRate());
     SmartDashboard.putNumber("ElevatorGoalHeight", m_controller.getGoal().position);
     SmartDashboard.putBoolean("ElevatorAtGoal", atGoal());
 

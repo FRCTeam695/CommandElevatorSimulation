@@ -12,6 +12,7 @@
       "/LiveWindow/Ungrouped/PIDController[2]": "PIDController",
       "/LiveWindow/Ungrouped/PWMSparkMax[0]": "Motor Controller",
       "/LiveWindow/Ungrouped/Scheduler": "Scheduler",
+      "/SmartDashboard/Elevator": "Subsystem",
       "/SmartDashboard/Elevator Sim": "Mechanism2d"
     },
     "windows": {
@@ -25,6 +26,9 @@
   "NetworkTables": {
     "transitory": {
       "SmartDashboard": {
+        "Elevator": {
+          "open": true
+        },
         "Elevator Sim": {
           "Elevator Root": {
             "Elevator": {
@@ -104,6 +108,15 @@
                 1.0
               ],
               "id": "NT:/SmartDashboard/setpointVelocity"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/ElevatorVelocity"
             }
           ]
         }

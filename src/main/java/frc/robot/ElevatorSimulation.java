@@ -57,6 +57,7 @@ public class ElevatorSimulation
 
         // Finally, we set our simulated encoder's readings and simulated battery voltage
         m_encoderSim.setDistance(m_elevatorSim.getPositionMeters());
+        m_encoderSim.setRate(m_elevatorSim.getVelocityMetersPerSecond());
         // SimBattery estimates loaded battery voltages
         RoboRioSim.setVInVoltage(
             BatterySim.calculateDefaultBatteryLoadedVoltage(m_elevatorSim.getCurrentDrawAmps()));

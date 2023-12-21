@@ -33,6 +33,11 @@ public class Elevator extends SubsystemBase implements AutoCloseable
   private ProfiledPIDController m_controller;
   private ElevatorFeedforward m_feedforward;
 
+  // because ProfiledPIDController doesn't calculate acceleration
+  // and because this elevator has enough mass that acceleration
+  // feedforward is worthwhile, and makes a difference
+  private double prevGoalVelocity = 0;
+
 
   // Tell Glass to create a visualization of the elevator
   private static final double VISUAL_HEIGHT = 10;
@@ -138,10 +143,23 @@ public class Elevator extends SubsystemBase implements AutoCloseable
   {
     m_controller.setGoal(goal);
 
+    double velocity = m_controller.getSetpoint().velocity;
+    double acceleration = (velocity - prevGoalVelocity) / m_controller.getPeriod();
+
     // With the setpoint value we run PID control like normal
     double pidOutput = m_controller.calculate(m_encoder.getDistance());
-    double feedforwardOutput = m_feedforward.calculate(m_controller.getSetpoint().velocity);
+    double feedforwardOutput = m_feedforward.calculate(velocity, acceleration);
+    
+    // having a plot of the PID (well, PD) and feedforward outputs is helpful
+    // during tuning; the PD output should be close to zero, and if it predictably
+    // deviates, the shape of the deviation indicates which of the
+    // feedforward components should be modified
+    SmartDashboard.putNumber("PIDOutput", pidOutput);
+    SmartDashboard.putNumber("FeedforwardOutput", feedforwardOutput);
+    
     m_motor.setVoltage(pidOutput + feedforwardOutput);
+
+    prevGoalVelocity = velocity;
   }
 
   private void internalStop()

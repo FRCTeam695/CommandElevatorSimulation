@@ -15,19 +15,21 @@ public class RobotContainer implements AutoCloseable
     private final CommandGenericHID m_joystick = new CommandGenericHID(Constants.kJoystickPort);
 
     // can these go into a hardware abstraction layer?
+    // they could go directly into Elevator instead, but this is a bonus if there are multiple
+    // robots to deploy code to, and if their motor controllers are ID'd differently, though it isn't
+    // helpful if different robots have different types of motor controllers
     private final Encoder elevatorEncoder = new Encoder(Constants.kEncoderAChannel, Constants.kEncoderBChannel);
     private final PWMSparkMax elevatorMotor = new PWMSparkMax(Constants.kMotorPort);
 
     private final Elevator m_elevator = new Elevator(elevatorEncoder, elevatorMotor);
 
-    private ElevatorSimulationInterface m_elevatorSimulation;
+    private ElevatorSimulation m_elevatorSimulation;
 
     public RobotContainer()
     {
-        if(RobotBase.isReal())
-            m_elevatorSimulation = ElevatorSimulationInterface.empty();
-        else
-            m_elevatorSimulation = new ElevatorSimulation(elevatorEncoder, elevatorMotor);
+        // simulation-only
+        if(!RobotBase.isReal())
+           m_elevatorSimulation = new ElevatorSimulation(elevatorEncoder, elevatorMotor);
 
         
         // This just makes sure that our simulation code knows that the motor's off.

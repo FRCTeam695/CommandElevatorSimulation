@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.simulation.EncoderSim;
 import edu.wpi.first.wpilibj.simulation.PWMSim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 
-public class ElevatorSimulation implements ElevatorSimulationInterface
+public class ElevatorSimulation
 {
     // Our link to the elevator control code, including sim classes that
     // allow us to inject values into it
@@ -46,7 +46,6 @@ public class ElevatorSimulation implements ElevatorSimulationInterface
     }
 
     /** Advance the simulation. */
-    @Override
     public void elevatorSimulationPeriodic()
     {
         // In this method, we update our simulation of what our elevator is doing

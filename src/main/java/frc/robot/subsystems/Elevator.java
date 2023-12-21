@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -76,6 +78,11 @@ public class Elevator extends SubsystemBase implements AutoCloseable
   public Command goToHeight(double goal)
   {
     return run(()-> reachGoal(goal));
+  }
+
+  public Command manualControl(DoubleSupplier propVBus)
+  {
+    return run(()->m_motor.set(propVBus.getAsDouble()));
   }
 
   /** Whether the profile setpoint has reached goal state */

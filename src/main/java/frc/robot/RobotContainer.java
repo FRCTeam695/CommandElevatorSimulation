@@ -46,7 +46,8 @@ public class RobotContainer implements AutoCloseable
         m_joystick.button(4).onTrue(m_elevator.goToHeight(1.00));
         m_joystick.button(10).onTrue(m_elevator.goToHeight(0.00));
         
-        m_joystick.button(5).whileTrue(m_elevator.manualControl(()->-0.2*m_joystick.getRawAxis(1)));
+        m_joystick.button(5).whileTrue(m_elevator.manualControl(()->-0.2*m_joystick.getRawAxis(3)));
+        m_joystick.button(6).whileTrue(m_elevator.closedLoopManualSetpoint(()->-1.25*m_joystick.getRawAxis(3)));
     }
 
     public void simulationPeriodic()

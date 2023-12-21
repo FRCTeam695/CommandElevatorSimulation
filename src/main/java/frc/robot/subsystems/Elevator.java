@@ -66,6 +66,8 @@ public class Elevator extends SubsystemBase implements AutoCloseable
     // Publish Mechanism2d to SmartDashboard
     // To view the Elevator visualization, select Network Tables -> SmartDashboard -> Elevator Sim
     SmartDashboard.putData("Elevator Sim", m_elevatorDisplay);
+
+    SmartDashboard.putData(this);
   }
 
   // Public interface -- this (and only this) is how you control the elevator
@@ -83,17 +85,17 @@ public class Elevator extends SubsystemBase implements AutoCloseable
    */
   public Command goToHeight(double goal)
   {
-    return run(()-> reachGoal(goal));
+    return run(()-> reachGoal(goal)).withName("Static Height - " + goal);
   }
 
   public Command manualControl(DoubleSupplier propVBus)
   {
-    return run(()->m_motor.set(propVBus.getAsDouble()));
+    return run(()->m_motor.set(propVBus.getAsDouble())).withName("Manual Control");
   }
 
   public Command closedLoopManualSetpoint(DoubleSupplier setpoint)
   {
-    return run(()->reachGoal(MathUtil.clamp(setpoint.getAsDouble(),0,1.25)));
+    return run(()->reachGoal(MathUtil.clamp(setpoint.getAsDouble(),0,1.25))).withName("Closed Loop Variable Setpoint");
   }
 
   /** Whether the profile setpoint has reached goal state */
@@ -105,7 +107,7 @@ public class Elevator extends SubsystemBase implements AutoCloseable
   /** Stop the control loop and motor output. */
   public Command stop()
   {
-    return run(()-> internalStop()).ignoringDisable(true);
+    return run(()-> internalStop()).ignoringDisable(true).withName("Stop");
   }
 
   // Subsystem Boilerplate

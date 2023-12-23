@@ -57,10 +57,16 @@ public class Elevator extends SubsystemBase implements AutoCloseable
     m_encoder.setDistancePerPulse(Constants.kElevatorEncoderDistPerPulse);
 
     // I don't like that this is currently in two sections, but I haven't figured out
-    // what a better way would be -- it probably should use Preferences, and it would
-    // also make for a good example if the gains and feedforward constants were included
+    // what a better way would be -- it probably should use Preferences
     SmartDashboard.putNumber("maxVelocity", maxVelFromDash);
     SmartDashboard.putNumber("maxAcceleration", maxAccelFromDash);
+    SmartDashboard.putNumber("kElevatorKp", Constants.kElevatorKp);
+    SmartDashboard.putNumber("kElevatorKi", Constants.kElevatorKi);
+    SmartDashboard.putNumber("kElevatorKd", Constants.kElevatorKd);
+    SmartDashboard.putNumber("kElevatorKs", Constants.kElevatorkS);
+    SmartDashboard.putNumber("kElevatorKg", Constants.kElevatorkG);
+    SmartDashboard.putNumber("kElevatorKv", Constants.kElevatorkV);
+    SmartDashboard.putNumber("kElevatorKa", Constants.kElevatorkA);
     initConstantsInternal();
 
     // Publish Mechanism2d to SmartDashboard
@@ -132,19 +138,28 @@ public class Elevator extends SubsystemBase implements AutoCloseable
       maxVelFromDash = SmartDashboard.getNumber("maxVelocity", maxVelFromDash);
       maxAccelFromDash = SmartDashboard.getNumber("maxAcceleration", maxAccelFromDash);
 
+      double Kp = SmartDashboard.getNumber("kElevatorKp", Constants.kElevatorKp);
+      double Ki = SmartDashboard.getNumber("kElevatorKi", Constants.kElevatorKi);
+      double Kd = SmartDashboard.getNumber("kElevatorKd", Constants.kElevatorKd);
+
+      double Ks = SmartDashboard.getNumber("kElevatorKs", Constants.kElevatorkS);
+      double Kg = SmartDashboard.getNumber("kElevatorKg", Constants.kElevatorkG);
+      double Kv = SmartDashboard.getNumber("kElevatorKv", Constants.kElevatorkV);
+      double Ka = SmartDashboard.getNumber("kElevatorKa", Constants.kElevatorkA);
+
       m_controller =
         new ProfiledPIDController(
-            Constants.kElevatorKp,
-            Constants.kElevatorKi,
-            Constants.kElevatorKd,
+            Kp,
+            Ki,
+            Kd,
             new TrapezoidProfile.Constraints(maxVelFromDash, maxAccelFromDash));
       
       m_feedforward =
         new ElevatorFeedforward(
-            Constants.kElevatorkS,
-            Constants.kElevatorkG,
-            Constants.kElevatorkV,
-            Constants.kElevatorkA);
+            Ks,
+            Kg,
+            Kv,
+            Ka);
     }
 
   private void reachGoal(double goal)

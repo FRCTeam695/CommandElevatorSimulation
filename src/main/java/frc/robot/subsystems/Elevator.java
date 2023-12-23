@@ -40,6 +40,9 @@ public class Elevator extends SubsystemBase implements AutoCloseable
   // feedforward is worthwhile, and makes a difference
   private double prevGoalVelocity = 0;
 
+  private double pidOutput = 0;
+  private double feedforwardOutput = 0;
+
 
   // Tell Glass to create a visualization of the elevator
   private static final double VISUAL_HEIGHT = 10;
@@ -172,16 +175,16 @@ public class Elevator extends SubsystemBase implements AutoCloseable
             Ka);
     }
 
-  private void reachGoal(double goal)
+  private void updateController()
   {
-    m_controller.setGoal(MathUtil.clamp(goal,Constants.kMinElevatorHeightMeters,Constants.kMaxElevatorHeightMeters));
-
     double velocity = m_controller.getSetpoint().velocity;
     double acceleration = (velocity - prevGoalVelocity) / m_controller.getPeriod();
 
     // With the setpoint value we run PID control like normal
-    double pidOutput = m_controller.calculate(m_encoder.getDistance());
-    double feedforwardOutput = m_feedforward.calculate(velocity, acceleration);
+    pidOutput = m_controller.calculate(m_encoder.getDistance());
+    feedforwardOutput = m_feedforward.calculate(velocity, acceleration);
+
+    prevGoalVelocity = velocity;
     
     // having a plot of the PID (well, PD) and feedforward outputs is helpful
     // during tuning; the PD output should be close to zero, and if it predictably
@@ -189,10 +192,15 @@ public class Elevator extends SubsystemBase implements AutoCloseable
     // feedforward components should be modified
     SmartDashboard.putNumber("PIDOutput", pidOutput);
     SmartDashboard.putNumber("FeedforwardOutput", feedforwardOutput);
+  }
+
+  private void reachGoal(double goal)
+  {
+    m_controller.setGoal(MathUtil.clamp(goal,Constants.kMinElevatorHeightMeters,Constants.kMaxElevatorHeightMeters));
+
+    updateController();
     
     m_motor.setVoltage(pidOutput + feedforwardOutput);
-
-    prevGoalVelocity = velocity;
   }
 
   private void internalDepower()
@@ -202,6 +210,8 @@ public class Elevator extends SubsystemBase implements AutoCloseable
     // this isn't necessary if all closed-loop commands also make this call
     // in their inits, but it doesn't hurt
     resetStateToPresent();
+    
+    updateController();
 
     m_motor.set(0.0);
   }

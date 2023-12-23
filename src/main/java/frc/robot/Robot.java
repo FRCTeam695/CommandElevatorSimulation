@@ -4,7 +4,9 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 /** This is a sample program to demonstrate the use of elevator simulation. */
@@ -22,6 +24,7 @@ public class Robot extends TimedRobot
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
+    SmartDashboard.putNumber("BatteryVoltage", RobotController.getBatteryVoltage());
   }
 
   @Override

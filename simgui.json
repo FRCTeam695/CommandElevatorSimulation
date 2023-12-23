@@ -9,6 +9,7 @@
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
+      "/LiveWindow/Ungrouped/PIDController[1]": "PIDController",
       "/LiveWindow/Ungrouped/PIDController[2]": "PIDController",
       "/LiveWindow/Ungrouped/PWMSparkMax[0]": "Motor Controller",
       "/LiveWindow/Ungrouped/Scheduler": "Scheduler",
@@ -79,6 +80,15 @@
                 1.0
               ],
               "id": "NT:/SmartDashboard/ElevatorGoalHeight"
+            },
+            {
+              "color": [
+                0.7686275243759155,
+                0.7550173997879028,
+                0.30588236451148987,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/StateSpacePosition"
             }
           ]
         }
@@ -117,6 +127,15 @@
                 1.0
               ],
               "id": "NT:/SmartDashboard/ElevatorVelocity"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/StateSpaceVelocity"
             }
           ]
         }
@@ -155,6 +174,15 @@
                 1.0
               ],
               "id": "NT:/SmartDashboard/PIDOutput"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/LQROutput"
             }
           ]
         }

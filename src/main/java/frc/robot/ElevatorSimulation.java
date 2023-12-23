@@ -31,9 +31,9 @@ public class ElevatorSimulation
             Constants.kElevatorDrumRadius,
             Constants.kMinElevatorHeightMeters,
             Constants.kMaxElevatorHeightMeters,
-            true,
+            Constants.kSimulateGravity,
             0,
-            VecBuilder.fill(0.01));
+            VecBuilder.fill(0.005));
 
     // Simulate the behavior of an elevator, using the supplied connections
     public ElevatorSimulation(Encoder encoder, PWMMotorController motor)

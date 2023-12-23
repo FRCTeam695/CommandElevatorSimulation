@@ -12,6 +12,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Encoder;
 import frc.robot.Constants;
+import frc.robot.StateSpaceElevator;
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
@@ -24,8 +25,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Elevator extends SubsystemBase implements AutoCloseable
 {
   // Default Constants/Gains
-  private double maxVelFromDash = 2.45;
-  private double maxAccelFromDash = 2.45;
+  private double maxVelFromDash = Constants.kMaxElevatorVelocity;
+  private double maxAccelFromDash = Constants.kMaxElevatorAcceleration;
 
   // Hardware interface - only this talks to the outside world
   private final Encoder m_encoder;
@@ -34,6 +35,7 @@ public class Elevator extends SubsystemBase implements AutoCloseable
   // Calculators - poke results in, get results out
   private ProfiledPIDController m_controller;
   private ElevatorFeedforward m_feedforward;
+  private StateSpaceElevator m_stateSpace;
 
   // because ProfiledPIDController doesn't calculate acceleration
   // and because this elevator has enough mass that acceleration
@@ -42,6 +44,7 @@ public class Elevator extends SubsystemBase implements AutoCloseable
 
   private double pidOutput = 0;
   private double feedforwardOutput = 0;
+  private double lqrOutput = 0;
 
 
   // Tell Glass to create a visualization of the elevator
@@ -173,6 +176,8 @@ public class Elevator extends SubsystemBase implements AutoCloseable
             Kg,
             Kv,
             Ka);
+
+      m_stateSpace = new StateSpaceElevator();
     }
 
   private void updateController()
@@ -183,6 +188,7 @@ public class Elevator extends SubsystemBase implements AutoCloseable
     // With the setpoint value we run PID control like normal
     pidOutput = m_controller.calculate(m_encoder.getDistance());
     feedforwardOutput = m_feedforward.calculate(velocity, acceleration);
+    lqrOutput = m_stateSpace.nextVoltageFromGoalAndPosition(m_controller.getGoal().position, m_encoder.getDistance());
 
     prevGoalVelocity = velocity;
     
@@ -192,6 +198,7 @@ public class Elevator extends SubsystemBase implements AutoCloseable
     // feedforward components should be modified
     SmartDashboard.putNumber("PIDOutput", pidOutput);
     SmartDashboard.putNumber("FeedforwardOutput", feedforwardOutput);
+    SmartDashboard.putNumber("LQROutput", lqrOutput);
   }
 
   private void reachGoal(double goal)
@@ -200,7 +207,8 @@ public class Elevator extends SubsystemBase implements AutoCloseable
 
     updateController();
     
-    m_motor.setVoltage(pidOutput + feedforwardOutput);
+    //m_motor.setVoltage(pidOutput + feedforwardOutput);
+    m_motor.setVoltage(lqrOutput);
   }
 
   private void internalDepower()
@@ -218,6 +226,7 @@ public class Elevator extends SubsystemBase implements AutoCloseable
 
   private void resetStateToPresent() {
     m_controller.reset(m_encoder.getDistance(), m_encoder.getRate());
+    m_stateSpace.init(m_encoder.getDistance(), m_encoder.getRate());
   }
 
   private Command initAndRun(Runnable onInit, Runnable onExecute) {

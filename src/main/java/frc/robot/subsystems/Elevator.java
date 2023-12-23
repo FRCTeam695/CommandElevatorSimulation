@@ -107,7 +107,7 @@ public class Elevator extends SubsystemBase implements AutoCloseable
   {
     return initAndRun(
       this::resetStateToPresent, 
-      ()->reachGoal(MathUtil.clamp(setpoint.getAsDouble(),0,1.25)))
+      ()->reachGoal(setpoint.getAsDouble()))
     .withName("Closed Loop Variable Setpoint");
   }
 
@@ -171,7 +171,7 @@ public class Elevator extends SubsystemBase implements AutoCloseable
 
   private void reachGoal(double goal)
   {
-    m_controller.setGoal(goal);
+    m_controller.setGoal(MathUtil.clamp(goal,Constants.kMinElevatorHeightMeters,Constants.kMaxElevatorHeightMeters));
 
     double velocity = m_controller.getSetpoint().velocity;
     double acceleration = (velocity - prevGoalVelocity) / m_controller.getPeriod();

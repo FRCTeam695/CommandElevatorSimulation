@@ -92,6 +92,9 @@ public class Elevator extends SubsystemBase implements AutoCloseable
    */
   public Command goToHeight(double goal)
   {
+    // fail faster; this factory method should be called during robotInit or autonomousInit
+    assertWithinRange(goal, Constants.kMinElevatorHeightMeters, Constants.kMaxElevatorHeightMeters);
+
     return initAndRun(
       this::resetStateToPresent,
       ()-> reachGoal(goal))
@@ -215,6 +218,14 @@ public class Elevator extends SubsystemBase implements AutoCloseable
       ()->{return false;}, // does not end
       this // could be a static function, if not for this
       );
+  }
+
+  private static void assertWithinRange(double value, double low, double high)
+  {
+    if(value < low)
+      throw new IllegalArgumentException("Goal height too low: " + value + " min: " + low + " (max: " + high + ")");
+    if(value > high)
+      throw new IllegalArgumentException("Goal height too high: " + value + " max: " + high + " (min: " + low + ")");
   }
 
 

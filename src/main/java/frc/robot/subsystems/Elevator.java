@@ -92,13 +92,10 @@ public class Elevator extends SubsystemBase implements AutoCloseable
    */
   public Command goToHeight(double goal)
   {
-    return new FunctionalCommand(
-      ()->{m_controller.reset(m_encoder.getDistance(), m_encoder.getRate());},
-      ()-> reachGoal(goal),
-      (interrupted)->{},
-      ()->{return false;},
-      this
-      ).withName("Static Height - " + goal);
+    return initAndRun(
+      this::resetStateToPresent,
+      ()-> reachGoal(goal))
+    .withName("Static Height - " + goal);
   }
 
   public Command manualControl(DoubleSupplier propVBus)
@@ -108,13 +105,10 @@ public class Elevator extends SubsystemBase implements AutoCloseable
 
   public Command closedLoopManualSetpoint(DoubleSupplier setpoint)
   {
-    return new FunctionalCommand(
-      ()->{m_controller.reset(m_encoder.getDistance(), m_encoder.getRate());},
-      ()->reachGoal(MathUtil.clamp(setpoint.getAsDouble(),0,1.25)),
-      (interrupted)->{},
-      ()->{return false;},
-      this
-      ).withName("Closed Loop Variable Setpoint");
+    return initAndRun(
+      this::resetStateToPresent, 
+      ()->reachGoal(MathUtil.clamp(setpoint.getAsDouble(),0,1.25)))
+    .withName("Closed Loop Variable Setpoint");
   }
 
   /** Whether the profile setpoint has reached goal state */
@@ -202,11 +196,27 @@ public class Elevator extends SubsystemBase implements AutoCloseable
   {
     m_controller.setGoal(0.0);
 
-    // when controller is inactive, it should still be updated
-    // with the state of the physical elevator; position and velocity 
-    m_controller.reset(m_encoder.getDistance(), m_encoder.getRate());
+    // this isn't necessary if all closed-loop commands also make this call
+    // in their inits, but it doesn't hurt
+    resetStateToPresent();
+
     m_motor.set(0.0);
   }
+
+  private void resetStateToPresent() {
+    m_controller.reset(m_encoder.getDistance(), m_encoder.getRate());
+  }
+
+  private Command initAndRun(Runnable onInit, Runnable onExecute) {
+    return new FunctionalCommand(
+      onInit,
+      onExecute,
+      (interrupted)->{}, // no end action
+      ()->{return false;}, // does not end
+      this // could be a static function, if not for this
+      );
+  }
+
 
   private void updateTelemetry()
   {

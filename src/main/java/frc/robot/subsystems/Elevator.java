@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Elevator extends SubsystemBase implements AutoCloseable
@@ -91,7 +92,13 @@ public class Elevator extends SubsystemBase implements AutoCloseable
    */
   public Command goToHeight(double goal)
   {
-    return run(()-> reachGoal(goal)).withName("Static Height - " + goal);
+    return new FunctionalCommand(
+      ()->{m_controller.reset(m_encoder.getDistance(), m_encoder.getRate());},
+      ()-> reachGoal(goal),
+      (interrupted)->{},
+      ()->{return false;},
+      this
+      ).withName("Static Height - " + goal);
   }
 
   public Command manualControl(DoubleSupplier propVBus)
@@ -101,7 +108,13 @@ public class Elevator extends SubsystemBase implements AutoCloseable
 
   public Command closedLoopManualSetpoint(DoubleSupplier setpoint)
   {
-    return run(()->reachGoal(MathUtil.clamp(setpoint.getAsDouble(),0,1.25))).withName("Closed Loop Variable Setpoint");
+    return new FunctionalCommand(
+      ()->{m_controller.reset(m_encoder.getDistance(), m_encoder.getRate());},
+      ()->reachGoal(MathUtil.clamp(setpoint.getAsDouble(),0,1.25)),
+      (interrupted)->{},
+      ()->{return false;},
+      this
+      ).withName("Closed Loop Variable Setpoint");
   }
 
   /** Whether the profile setpoint has reached goal state */
